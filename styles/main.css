@@ -18,9 +18,11 @@
     0% {
         background-color: #FFF;
     }
+
     50% {
         background-color: #CCFFC6;
     }
+
     100% {
         background-color: #FFF;
     }
@@ -39,8 +41,8 @@
     text-shadow: #FFF 0px 0px 5px;
 }
 
-.collection-item > .row {
-    margin-bottom:0px;
+.collection-item>.row {
+    margin-bottom: 0px;
 }
 
 #input-pane {
@@ -53,4 +55,20 @@
     overflow: auto;
     max-width: 100%;
     max-height: 500px;
+}
+
+.color-sampler-preview {
+    width: 15px;
+    height: 15px;
+    background-color: #AAA;
+    border-radius: 50%;
+
+    position: absolute;
+    z-index: 100;
+    display: none;
+
+    border: 1px solid;
+    border-radius: 50%;
+    overflow: hidden;
+    /* background-size: 6px; */
 }

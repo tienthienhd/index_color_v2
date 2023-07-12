@@ -34,11 +34,16 @@
                     </li>
                 </ul>
             </div>
+
             <div id="input-pane" class="col s12">
+                <div id="color-preview" class="color-sampler-preview">preview</div>
+                <div id="palette_input" class="palette row"></div>
+
                 <canvas id="canvas"></canvas>
+
                 <img id="imgTrivial" crossorigin="anonymous" src="https://i.imgur.com/o5CqO57.png"
                     style="display:none" />
-                <img id="imgSmall" crossorigin="anonymous" src="https://i.imgur.com/YgYLDGP.png" style="display:none" />
+                <img id="imgSmall" crossorigin="anonymous" src="https://i.imgur.com/zNCHVMw.jpg" style="display:none" />
 
                 <img id="imgMedium" crossorigin="anonymous" src="https://i.imgur.com/nLeNgYbr.jpg"
                     style="display:none" />
@@ -46,6 +51,20 @@
             <!-- I suck at materializecss design, in case you haven't noticed yet -->
             <div id="options-pane" class="col s12">
                 <ul class="collection">
+                    <li class="collection-item">
+                        <div class="row">
+                            <div class="col s3" style="margin-top: 34px;">
+                                <label>
+                                    <span>Pallete input option
+                                        <i class="material-icons tooltipped"
+                                            data-tooltip="List color has choose before.">info</i>
+                                    </span>
+                                </label>
+                            </div>
+                            <div id="palette_input_option" class="palette">
+                            </div>
+                        </div>
+                    </li>
                     <li class="collection-item">
                         <div class="row">
                             <div class="col s3" style="margin-top: 34px;">
@@ -70,7 +89,7 @@
                     <li class="collection-item">
                         <div class="row">
                             <div class="input-field col s2">
-                                <input id="txtNrOfClusters" type="number" value="16" min="1" class="validate">
+                                <input id="txtNrOfClusters" type="number" value="30" min="1" class="validate">
                                 <label for="txtNrOfClusters">Number of colors
                                     <i class="material-icons tooltipped"
                                         data-tooltip="The number of colors to quantize the image to">info</i>
@@ -85,10 +104,9 @@
                                         data-tooltip="The threshold delta distance of the k-means clustering to reach before stopping. Having a bigger value will speed up the clustering but may yield suboptimal clusters.">info</i>
                                 </label>
                             </div>
-                            
+
                             <div class="input-field col s2">
-                                <input id="txtRandomSeed" type="number" value="0" min="0" step="1"
-                                    class="validate">
+                                <input id="txtRandomSeed" type="number" value="0" min="0" step="1" class="validate">
                                 <label for="txtRandomSeed">Random seed
                                     <i class="material-icons tooltipped"
                                         data-tooltip="The seed to use for the random number generator to choose the initial centroids for k-means clusering. Using the same seed ensures you will get the same result every time.">info</i>
@@ -340,6 +358,16 @@
                             <input id="chkShowBorders" type="checkbox" checked="checked" />
                             <span>Show borders</span>
                         </label>
+                    </div>
+                    <div class="col s2">
+                        <div class="input-field">
+                            <input id="optAlphaFill" type="number" value="0.5" min="0" max="1" step="0.1" class="validate">
+                            <label for="optAlphaFill">Alpha fill
+                                <i class="material-icons tooltipped"
+                                    data-tooltip="Narrow pixel cleanup removes strips of single pixel rows, which would make some facets have some borders segments that are way too narrow to be useful. The small facet removal can introduce new narrow pixel strips, so this is repeated in a few iterative runs.">info</i>
+                            </label>
+                        </div>
+
                     </div>
                 </div>
                 <div class="row">

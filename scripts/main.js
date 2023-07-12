@@ -88,7 +88,7 @@ define("lib/clustering", ["require", "exports"], function (require, exports) {
     }
     exports.Vector = Vector;
     class KMeans {
-        constructor(points, k, random, centroids = null) {
+        constructor(points, k, random, centroids = null, anchors=null) {
             this.points = points;
             this.k = k;
             this.random = random;
@@ -96,14 +96,21 @@ define("lib/clustering", ["require", "exports"], function (require, exports) {
             this.pointsPerCategory = [];
             this.centroids = [];
             this.currentDeltaDistanceDifference = 0;
+            this.anchors = [];
             if (centroids != null) {
                 this.centroids = centroids;
                 for (let i = 0; i < this.k; i++) {
                     this.pointsPerCategory.push([]);
                 }
-            }
-            else {
+            } else {
                 this.initCentroids();
+            }
+
+            if (anchors != null){
+                this.anchors = anchors;
+                for(let i =0; i< this.anchors.length; i++){
+                    this.centroids[i] = this.anchors[i];
+                }
             }
         }
         initCentroids() {
@@ -112,7 +119,7 @@ define("lib/clustering", ["require", "exports"], function (require, exports) {
                 this.pointsPerCategory.push([]);
             }
         }
-        step() {
+        step() {            
             // clear category
             for (let i = 0; i < this.k; i++) {
                 this.pointsPerCategory[i] = [];
@@ -132,7 +139,7 @@ define("lib/clustering", ["require", "exports"], function (require, exports) {
             }
             let totalDistanceDiff = 0;
             // adjust centroids
-            for (let k = 0; k < this.pointsPerCategory.length; k++) {
+            for (let k = this.anchors.length; k < this.pointsPerCategory.length; k++) {
                 const cat = this.pointsPerCategory[k];
                 if (cat.length > 0) {
                     const avg = Vector.average(cat);
@@ -247,8 +254,8 @@ define("lib/colorconversion", ["require", "exports"], function (require, exports
         g = (g > 0.0031308) ? (1.055 * Math.pow(g, 1 / 2.4) - 0.055) : 12.92 * g;
         b = (b > 0.0031308) ? (1.055 * Math.pow(b, 1 / 2.4) - 0.055) : 12.92 * b;
         return [Math.max(0, Math.min(1, r)) * 255,
-            Math.max(0, Math.min(1, g)) * 255,
-            Math.max(0, Math.min(1, b)) * 255];
+        Math.max(0, Math.min(1, g)) * 255,
+        Math.max(0, Math.min(1, b)) * 255];
     }
     exports.lab2rgb = lab2rgb;
     function rgb2lab(rgb) {
@@ -281,6 +288,7 @@ define("settings", ["require", "exports"], function (require, exports) {
             this.kMeansMinDeltaDifference = 1;
             this.kMeansClusteringColorSpace = ClusteringColorSpace.RGB;
             this.kMeansColorRestrictions = [];
+            this.kMeansColorAnchors = [];
             this.colorAliases = {};
             this.narrowPixelStripCleanupRuns = 3; // 3 seems like a good compromise between removing enough narrow pixel strips to convergence. This fixes e.g. https://i.imgur.com/dz4ANz1.png
             this.removeFacetsSmallerThanNrOfPoints = 20;
@@ -446,8 +454,33 @@ define("colorreductionmanagement", ["require", "exports", "common", "lib/cluster
                     vectors[vIdx++] = vec;
                 }
                 const random = new random_1.Random(settings.randomSeed);
+                // setting anchor to color space
+                for(let i=0; i < settings.kMeansColorAnchors.length; i++){
+                    let rgb = settings.kMeansColorAnchors[i];
+                    rgb[0] = rgb[0] >> bitsToChopOff << bitsToChopOff;
+                    rgb[1] = rgb[1] >> bitsToChopOff << bitsToChopOff;
+                    rgb[2] = rgb[2] >> bitsToChopOff << bitsToChopOff;
+                    // determine vector data based on color space conversion
+                    let data;
+                    if (settings.kMeansClusteringColorSpace === settings_1.ClusteringColorSpace.RGB) {
+                        data = rgb;
+                    }
+                    else if (settings.kMeansClusteringColorSpace === settings_1.ClusteringColorSpace.HSL) {
+                        data = colorconversion_1.rgbToHsl(rgb[0], rgb[1], rgb[2]);
+                    }
+                    else if (settings.kMeansClusteringColorSpace === settings_1.ClusteringColorSpace.LAB) {
+                        data = colorconversion_1.rgb2lab(rgb);
+                    }
+                    else {
+                        data = rgb;
+                    }
+                    const weight = 1;
+                    const vec = new clustering_1.Vector(data, weight);
+                    settings.kMeansColorAnchors[i] = vec;
+                }
+
                 // vectors of all the unique colors are built, time to cluster them
-                const kmeans = new clustering_1.KMeans(vectors, settings.kMeansNrOfClusters, random);
+                const kmeans = new clustering_1.KMeans(vectors, settings.kMeansNrOfClusters, random, null, settings.kMeansColorAnchors);
                 let curTime = new Date().getTime();
                 kmeans.step();
                 while (kmeans.currentDeltaDistanceDifference > settings.kMeansMinDeltaDifference) {
@@ -2894,7 +2927,7 @@ define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "
         /**
          *  Creates a vector based SVG image of the facets with the given configuration
          */
-        static createSVG(facetResult, colorsByIndex, sizeMultiplier, fill, stroke, addColorLabels, fontSize = 50, fontColor = "black", onUpdate = null) {
+        static createSVG(facetResult, colorsByIndex, sizeMultiplier, fill, stroke, addColorLabels, fontSize = 50, fontColor = "black",  fillAlpha=1, onUpdate = null) {
             return __awaiter(this, void 0, void 0, function* () {
                 const xmlns = "http://www.w3.org/2000/svg";
                 const svg = document.createElementNS(xmlns, "svg");
@@ -2948,7 +2981,7 @@ define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "
                         }
                         svgPath.style.strokeWidth = "1px"; // Set stroke width
                         if (fill) {
-                            svgPath.style.fill = `rgb(${colorsByIndex[f.color][0]},${colorsByIndex[f.color][1]},${colorsByIndex[f.color][2]})`;
+                            svgPath.style.fill = `rgba(${colorsByIndex[f.color][0]},${colorsByIndex[f.color][1]},${colorsByIndex[f.color][2]}, ${fillAlpha})`;
                         }
                         else {
                             svgPath.style.fill = "none";
@@ -2986,7 +3019,7 @@ define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "
                             txt.setAttribute("dominant-baseline", "middle");
                             txt.setAttribute("text-anchor", "middle");
                             txt.setAttribute("fill", fontColor);
-                            txt.textContent = f.color + "";
+                            txt.textContent = (f.color + 1) + "";
                             const subsvg = document.createElementNS(xmlns, "svg");
                             subsvg.setAttribute("width", f.labelBounds.width * sizeMultiplier + "");
                             subsvg.setAttribute("height", f.labelBounds.height * sizeMultiplier + "");
@@ -3100,6 +3133,32 @@ define("gui", ["require", "exports", "common", "guiprocessmanager", "settings"],
                 }
             }
         }
+
+        let pre_pick_colors = [];
+        $('#palette_input_option > div').each(function(){
+            const rgbparts = $(this).attr('color_id').split(",");
+                if (rgbparts.length === 3) {
+                    let red = parseInt(rgbparts[0]);
+                    let green = parseInt(rgbparts[1]);
+                    let blue = parseInt(rgbparts[2]);
+                    if (red < 0)
+                        red = 0;
+                    if (red > 255)
+                        red = 255;
+                    if (green < 0)
+                        green = 0;
+                    if (green > 255)
+                        green = 255;
+                    if (blue < 0)
+                        blue = 0;
+                    if (blue > 255)
+                        blue = 255;
+                    if (!isNaN(red) && !isNaN(green) && !isNaN(blue)) {
+                        settings.kMeansColorAnchors.push([red, green, blue]);
+                    }
+                }
+        });
+        console.log(settings);
         return settings;
     }
     exports.parseSettings = parseSettings;
@@ -3130,10 +3189,11 @@ define("gui", ["require", "exports", "common", "guiprocessmanager", "settings"],
                 const sizeMultiplier = parseInt($("#txtSizeMultiplier").val() + "");
                 const fontSize = parseInt($("#txtLabelFontSize").val() + "");
                 const fontColor = $("#txtLabelFontColor").val() + "";
+                const fillAlpha = parseFloat($("#optAlphaFill").val());
                 $("#statusSVGGenerate").css("width", "0%");
                 $(".status.SVGGenerate").removeClass("complete");
                 $(".status.SVGGenerate").addClass("active");
-                const svg = yield guiprocessmanager_1.GUIProcessManager.createSVG(processResult.facetResult, processResult.colorsByIndex, sizeMultiplier, fill, stroke, showLabels, fontSize, fontColor, (progress) => {
+                const svg = yield guiprocessmanager_1.GUIProcessManager.createSVG(processResult.facetResult, processResult.colorsByIndex, sizeMultiplier, fill, stroke, showLabels, fontSize, fontColor, fillAlpha, (progress) => {
                     if (cancellationToken.isCancelled) {
                         throw new Error("Cancelled");
                     }
@@ -3152,7 +3212,7 @@ define("gui", ["require", "exports", "common", "guiprocessmanager", "settings"],
         let html = "";
         for (let c = 0; c < colorsByIndex.length; c++) {
             const style = "background-color: " + `rgb(${colorsByIndex[c][0]},${colorsByIndex[c][1]},${colorsByIndex[c][2]})`;
-            html += `<div class="color" class="tooltipped" style="${style}" data-tooltip="${colorsByIndex[c][0]},${colorsByIndex[c][1]},${colorsByIndex[c][2]}">${c}</div>`;
+            html += `<div class="color" class="tooltipped" style="${style}" data-tooltip="${colorsByIndex[c][0]},${colorsByIndex[c][1]},${colorsByIndex[c][2]}">${c + 1}</div>`;
         }
         return $(html);
     }
@@ -3402,6 +3462,8 @@ define("main", ["require", "exports", "gui", "lib/clipboard"], function (require
         $(".tooltipped").tooltip();
         const clip = new clipboard_1.Clipboard("canvas", true);
         $("#file").change(function (ev) {
+            $("#palette_input").empty()
+            $("#palette_input_option").empty()
             const files = $("#file").get(0).files;
             if (files !== null && files.length > 0) {
                 const reader = new FileReader();
@@ -3423,6 +3485,71 @@ define("main", ["require", "exports", "gui", "lib/clipboard"], function (require
             }
         });
         gui_2.loadExample("imgSmall");
+        $("#canvas").click(function (e) {
+            const c = document.getElementById("canvas");
+            const ctx = c.getContext("2d");
+            let x = e.offsetX;
+            let y = e.offsetY;
+            var imageData = ctx.getImageData(x, y, 1, 1).data;
+            let rgbColor = imageData[0] + ',' + imageData[1] + ',' + imageData[2];
+            let rgbaColor = 'rgba(' + imageData[0] + ',' + imageData[1] + ',' + imageData[2] + ',1)';
+            
+            let exists = false;
+            $('#palette_input_option > div').each(function(){
+                const rgbparts = $(this).attr('color_id');
+                if (rgbparts == rgbColor){
+                    exists = true;
+                }
+            });
+            if (exists){
+                return;
+            }
+            
+            const style = "background-color: " + rgbaColor;
+            const html = `<div class="color" class="tooltipped" style="${style}" data-tooltip="${rgbaColor}" color_id="${rgbColor}">x</div>`;
+            
+            $("#palette_input").append($(html));
+            $("#palette_input_option").append($(html));
+            
+        });
+/*
+        $('#canvas').mousemove(function(e) {
+            const c = document.getElementById("canvas");
+            const ctx = c.getContext("2d");
+            let x = e.offsetX;
+            let y = e.offsetY;
+            var imageData = ctx.getImageData(x, y, 1, 1).data;
+            let rgbColor = imageData[0] + ',' + imageData[1] + ',' + imageData[2];
+            let rgbaColor = 'rgba(' + imageData[0] + ',' + imageData[1] + ',' + imageData[2] + ',1)';
+
+            let color_preview = $('#color-preview');
+
+            let x_preview = $(this)[0].offsetLeft + x - 10;
+            let y_preview = $(this)[0].offsetTop + y - 15;
+
+            color_preview.css({
+                'left': `${x_preview}px`,
+                'top':  `${y_preview}px`,
+                'background-color': rgbaColor,
+                'display': 'block',
+              });
+        });
+        */
+
+        $('#palette_input').on('click', '.color', function(){
+            let color_id = $(this).attr('color_id');
+            $('div[color_id="'+ color_id+'"]').remove();
+            $(this).remove();
+        });
+
+        $('#palette_input_option').on('click', '.color', function(){
+            let color_id = $(this).attr('color_id');
+            $('div[color_id="'+ color_id+'"]').remove();
+            $(this).remove();
+        });
+
+        
+
         $("#btnProcess").click(function () {
             return __awaiter(this, void 0, void 0, function* () {
                 try {
@@ -3433,7 +3560,7 @@ define("main", ["require", "exports", "gui", "lib/clipboard"], function (require
                 }
             });
         });
-        $("#chkShowLabels, #chkFillFacets, #chkShowBorders, #txtSizeMultiplier, #txtLabelFontSize, #txtLabelFontColor").change(() => __awaiter(this, void 0, void 0, function* () {
+        $("#chkShowLabels, #chkFillFacets, #chkShowBorders, #txtSizeMultiplier, #txtLabelFontSize, #txtLabelFontColor, #optAlphaFill").change(() => __awaiter(this, void 0, void 0, function* () {
             yield gui_2.updateOutput();
         }));
         $("#btnDownloadSVG").click(function () {
