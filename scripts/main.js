@@ -2759,9 +2759,11 @@ define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "
                 const kmeansImgData = ctxKmeans.getImageData(0, 0, cKmeans.width, cKmeans.height);
                 tabsOutput.select("kmeans-pane");
                 $(".status.kMeans").addClass("active");
+                $(".status.all").addClass("active");
                 yield colorreductionmanagement_2.ColorReducer.applyKMeansClustering(imgData, kmeansImgData, ctx, settings, (kmeans) => {
                     const progress = (100 - (kmeans.currentDeltaDistanceDifference > 100 ? 100 : kmeans.currentDeltaDistanceDifference)) / 100;
                     $("#statusKMeans").css("width", Math.round(progress * 100) + "%");
+                    $("#statusAll").css("width", Math.round(0 * 100 / 6 + progress / 6 * 100) + "%");
                     ctxKmeans.putImageData(kmeansImgData, 0, 0);
                     console.log(kmeans.currentDeltaDistanceDifference);
                     if (cancellationToken.isCancelled) {
@@ -2783,6 +2785,7 @@ define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "
                         throw new Error("Cancelled");
                     }
                     $("#statusFacetBuilding").css("width", Math.round(progress * 100) + "%");
+                    $("#statusAll").css("width", Math.round(1 * 100 / 6 + progress / 6 * 100) + "%");
                 });
                 $(".status").removeClass("active");
                 $(".status.facetBuilding").addClass("complete");
@@ -2808,6 +2811,7 @@ define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "
                     }
                     // update status & image
                     $("#statusFacetReduction").css("width", Math.round(progress * 100) + "%");
+                    $("#statusAll").css("width", Math.round(2 * 100 / 6 + progress / 6 * 100) + "%");
                     let idx = 0;
                     for (let j = 0; j < facetResult.height; j++) {
                         for (let i = 0; i < facetResult.width; i++) {
@@ -2841,6 +2845,7 @@ define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "
                     }
                     // update status & image
                     $("#statusFacetBorderPath").css("width", Math.round(progress * 100) + "%");
+                    $("#statusAll").css("width", Math.round(3 * 100 / 6 + progress / 6 * 100) + "%");
                     ctxBorderPath.fillStyle = "white";
                     ctxBorderPath.fillRect(0, 0, cBorderPath.width, cBorderPath.height);
                     for (const f of facetResult.facets) {
@@ -2874,6 +2879,7 @@ define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "
                     }
                     // update status & image
                     $("#statusFacetBorderSegmentation").css("width", Math.round(progress * 100) + "%");
+                    $("#statusAll").css("width", Math.round(4 * 100 / 6 + progress / 6 * 100) + "%");
                     ctxBorderSegment.fillStyle = "white";
                     ctxBorderSegment.fillRect(0, 0, cBorderSegment.width, cBorderSegment.height);
                     for (const f of facetResult.facets) {
@@ -2912,6 +2918,7 @@ define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "
                     }
                     // update status & image
                     $("#statusFacetLabelPlacement").css("width", Math.round(progress * 100) + "%");
+                    $("#statusAll").css("width", Math.round(5 * 100 / 6 + progress / 6 * 100) + "%");
                     for (const f of facetResult.facets) {
                         if (f != null && f.labelBounds != null) {
                             ctxLabelPlacement.fillStyle = "red";

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Paint by number generator</title>
+    <title>Index color V2</title>
     <link rel="stylesheet" href="styles/lib/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
@@ -12,12 +12,12 @@
 <body>
     <div class="container">
         <div class="row">
-            <h2> Paint by number generator </h2>
-            <span>Paste from clipboard (ctrl+v) to change the image (or browse for a file <input id="file" type="file"
-                    accept="image/x-png,image/gif,image/jpeg"></input>). Large images are very slow to process
-                though.</span>
+            <h2> Index color V2 </h2>
+            <span>Dán từ bộ đệm (ctrl+v) để thay ảnh (hoặc tải file lên <input id="file" type="file"
+                    accept="image/x-png,image/gif,image/jpeg"></input>).</span>
             <br />
-            <span>Example images:
+            <span>Để chọn màu bạn mong muốn hay click vào vùng màu bạn mong muốn</span>
+            <span hidden>Example images:
                 <a id="lnkTrivial" href="#">trivial</a> -
                 <a id="lnkSmall" href="#">small</a> -
                 <a id="lnkMedium" href="#">medium</a>
@@ -27,10 +27,10 @@
             <div class="col s12">
                 <ul class="tabs">
                     <li class="tab col s2">
-                        <a href="#input-pane">Input</a>
+                        <a href="#input-pane">Ảnh đầu vào</a>
                     </li>
                     <li class="tab col s2">
-                        <a href="#options-pane">Options</a>
+                        <a href="#options-pane">Cài đặt</a>
                     </li>
                 </ul>
             </div>
@@ -55,9 +55,9 @@
                         <div class="row">
                             <div class="col s3" style="margin-top: 34px;">
                                 <label>
-                                    <span>Pallete input option
+                                    <span>Màu chỉ định trước
                                         <i class="material-icons tooltipped"
-                                            data-tooltip="List color has choose before.">info</i>
+                                            data-tooltip="Màu chọn từ ảnh mà mong muốn nó không đổi.">info</i>
                                     </span>
                                 </label>
                             </div>
@@ -70,18 +70,18 @@
                             <div class="col s3" style="margin-top: 34px;">
                                 <label>
                                     <input id="chkResizeImage" type="checkbox" checked="checked" />
-                                    <span>Resize image larger than
+                                    <span>Kích thước ảnh tính toán
                                         <i class="material-icons tooltipped"
-                                            data-tooltip="If checked and the input image is larger than the given dimensions then it will be resized to fit but will maintain its ratio.">info</i>
+                                            data-tooltip="Kích thước ảnh tối đa để tính toán. Nếu kích thước ảnh lớn hơn thì sẽ thay đổi lại kích thước về kích thước tối đa.">info</i>
                                     </span>
                                 </label>
                             </div>
                             <div class="col s2">
-                                <label for="txtResizeWidth">width</label>
+                                <label for="txtResizeWidth">Chiều rộng</label>
                                 <input id="txtResizeWidth" type="number" value="1024" min="1" class="validate">
                             </div>
                             <div class="col s2">
-                                <label for="txtResizeHeight">height</label>
+                                <label for="txtResizeHeight">Chiều cao</label>
                                 <input id="txtResizeHeight" type="number" value="1024" min="1" class="validate">
                             </div>
                         </div>
@@ -90,31 +90,31 @@
                         <div class="row">
                             <div class="input-field col s2">
                                 <input id="txtNrOfClusters" type="number" value="30" min="1" class="validate">
-                                <label for="txtNrOfClusters">Number of colors
+                                <label for="txtNrOfClusters">Số lượng màu tối đa
                                     <i class="material-icons tooltipped"
-                                        data-tooltip="The number of colors to quantize the image to">info</i>
+                                        data-tooltip="Số lượng màu tối đa đầu ra">info</i>
                                 </label>
                             </div>
 
-                            <div class="input-field col s2">
+                            <div class="input-field col s2" hidden>
                                 <input id="txtClusterPrecision" type="number" value="1" min="1" step="0.05"
                                     class="validate">
-                                <label for="txtClusterPrecision">Cluster precision
+                                <label for="txtClusterPrecision">Độ chính xác khi phân cụm
                                     <i class="material-icons tooltipped"
                                         data-tooltip="The threshold delta distance of the k-means clustering to reach before stopping. Having a bigger value will speed up the clustering but may yield suboptimal clusters.">info</i>
                                 </label>
                             </div>
 
-                            <div class="input-field col s2">
+                            <div class="input-field col s2", hidden>
                                 <input id="txtRandomSeed" type="number" value="0" min="0" step="1" class="validate">
-                                <label for="txtRandomSeed">Random seed
+                                <label for="txtRandomSeed">Random see   d
                                     <i class="material-icons tooltipped"
                                         data-tooltip="The seed to use for the random number generator to choose the initial centroids for k-means clusering. Using the same seed ensures you will get the same result every time.">info</i>
                                 </label>
                             </div>
                         </div>
                     </li>
-                    <li class="collection-item">
+                    <li class="collection-item" hidden>
                         <div class="row">
 
                             <div class="col s3">
@@ -159,7 +159,7 @@
                             <div class="input-field col s4">
                                 <input id="txtNarrowPixelStripCleanupRuns" type="number" value="3" min="0"
                                     class="validate">
-                                <label for="txtNarrowPixelStripCleanupRuns">Number of runs for narrow pixel cleanup
+                                <label for="txtNarrowPixelStripCleanupRuns">Số lần chạy xoá đường mảnh
                                     <i class="material-icons tooltipped"
                                         data-tooltip="Narrow pixel cleanup removes strips of single pixel rows, which would make some facets have some borders segments that are way too narrow to be useful. The small facet removal can introduce new narrow pixel strips, so this is repeated in a few iterative runs.">info</i>
                                 </label>
@@ -167,7 +167,7 @@
                             <div class="input-field col s4">
                                 <input id="txtRemoveFacetsSmallerThan" type="number" value="20" min="1"
                                     class="validate">
-                                <label for="txtRemoveFacetsSmallerThan">Remove small facets smaller than (pixels)
+                                <label for="txtRemoveFacetsSmallerThan">Ngưỡng kích thước vùng nhỏ (pixels)
                                     <i class="material-icons tooltipped"
                                         data-tooltip="Removes any facets that are smaller than the given amount of pixels. Lowering the value will create more detailed results but might be much harder to actually paint due to their size.">info</i>
                                 </label>
@@ -175,13 +175,13 @@
                             <div class="input-field col s4">
                                 <input id="txtMaximumNumberOfFacets" type="number" value="100000" min="1"
                                     class="validate">
-                                <label for="txtMaximumNumberOfFacets">Maximum number of facets
+                                <label for="txtMaximumNumberOfFacets">Số vùng màu tối đa
                                     <i class="material-icons tooltipped"
                                         data-tooltip="If there are more facets than the given maximum number, keep removing the smallest facets until the limit is reached">info</i>
                                 </label>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row" hidden>
                             <div class="input-field col s6">
                                 <div class="row">
                                     <div class="col s4">
@@ -209,7 +209,7 @@
 
                         </div>
                     </li>
-                    <li class="collection-item">
+                    <li class="collection-item" hidden>
                         <div class="row">
                             <div class="input-field col s5">
                                 <input id="txtNrOfTimesToHalveBorderSegments" type="number" value="2" min="0"
@@ -232,6 +232,17 @@
         </div>
 
         <div class="row">
+            <div class="col-12 ">
+                <div class="status all">
+                    Process
+                    <div class="progress">
+                        <div id="statusAll" class="determinate" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" hidden>
 
             <div class="col s2">
                 <div class="status kMeans">
@@ -282,7 +293,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" hidden>
             <div class="col s2">
                 <div class="status SVGGenerate">
                     SVG generation
@@ -338,7 +349,7 @@
             <div id="output-pane" class="col s12">
                 <div class="row">
                     <div class="col s2">
-                        <label>SVG Render options</label>
+                        <label>SVG cài đặt</label>
                     </div>
                     <div class="col s2">
                         <label>
@@ -361,11 +372,9 @@
                     </div>
                     <div class="col s2">
                         <div class="input-field">
-                            <input id="optAlphaFill" type="number" value="0.5" min="0" max="1" step="0.1" class="validate">
-                            <label for="optAlphaFill">Alpha fill
-                                <i class="material-icons tooltipped"
-                                    data-tooltip="Narrow pixel cleanup removes strips of single pixel rows, which would make some facets have some borders segments that are way too narrow to be useful. The small facet removal can introduce new narrow pixel strips, so this is repeated in a few iterative runs.">info</i>
-                            </label>
+                            <input id="optAlphaFill" type="number" value="0.5" min="0" max="1" step="0.1"
+                                class="validate">
+                            <label for="optAlphaFill">Alpha fill</label>
                         </div>
 
                     </div>
