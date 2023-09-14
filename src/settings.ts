@@ -1,4 +1,5 @@
 import { RGB } from "./common";
+import { Vector } from "./lib/clustering";
 
 export enum ClusteringColorSpace {
     RGB = 0,
@@ -12,6 +13,8 @@ export class Settings {
     public kMeansClusteringColorSpace: ClusteringColorSpace = ClusteringColorSpace.RGB;
 
     public kMeansColorRestrictions: Array<RGB | string> = [];
+
+    public kMeansColorAnchors: Array<RGB> = [];
 
     public colorAliases: { [key: string]: RGB } = {};
 

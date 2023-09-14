@@ -52,9 +52,10 @@ export class KMeans {
     public pointsPerCategory: Vector[][] = [];
 
     public centroids: Vector[] = [];
+    public anchors: Vector[] = [];
     public currentDeltaDistanceDifference: number = 0;
 
-    constructor(private points: Vector[], public k: number, private random:Random, centroids: Vector[] | null = null) {
+    constructor(private points: Vector[], public k: number, private random:Random, centroids: Vector[] | null = null, anchors: Vector[] | null = null) {
 
         if (centroids != null) {
             this.centroids = centroids;
@@ -64,6 +65,13 @@ export class KMeans {
         } else {
             this.initCentroids();
         }
+
+        if (anchors != null) {
+            this.anchors = anchors;
+            for (let i = 0; i < this.anchors.length; i++) {
+              this.centroids[i] = this.anchors[i];
+            }
+          }
     }
 
     private initCentroids() {
@@ -97,7 +105,7 @@ export class KMeans {
         let totalDistanceDiff = 0;
 
         // adjust centroids
-        for (let k: number = 0; k < this.pointsPerCategory.length; k++) {
+        for (let k: number = this.anchors.length; k < this.pointsPerCategory.length; k++) {
             const cat = this.pointsPerCategory[k];
             if (cat.length > 0) {
                 const avg = Vector.average(cat);

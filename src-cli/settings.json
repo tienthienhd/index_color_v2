@@ -1,9 +1,10 @@
 {
-    "randomSeed": 7707,
-    "kMeansNrOfClusters": 16,
+    "randomSeed": 0,
+    "kMeansNrOfClusters": 10,
     "kMeansMinDeltaDifference": 1,
     "kMeansClusteringColorSpace": 0,
     "kMeansColorRestrictions": [],
+    "kMeansColorAnchors": [],
     "colorAliases": {
         "A1": [            0,            0,            0        ],
         "A2": [            255,            0,            0        ],
@@ -11,11 +12,12 @@
         "A4": [            0,            0,            255        ],
         "B1": [            64,            64,            64        ],
         "B2": [            128,            128,            128        ],
-        "B3": [            192,            192,            192        ]
+        "B3": [            192,            192,            192        ],
+        "B4": [            252,            252,            252        ]
     },
     "removeFacetsSmallerThanNrOfPoints": 20,
     "removeFacetsFromLargeToSmall": true,
-    "maximumNumberOfFacets": 100,
+    "maximumNumberOfFacets": 1000000,
     "nrOfTimesToHalveBorderSegments": 2,
     "narrowPixelStripCleanupRuns": 3,
     "resizeImageIfTooLarge": true,

@@ -1,3 +1,6 @@
 node_modules
 *.js
 *.map
+dist/index-color-of-image-linux-x64
+dist/index-color-of-image-macos-arm64
+.gitignore

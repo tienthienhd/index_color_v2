@@ -3238,7 +3238,7 @@ define("gui", ["require", "exports", "common", "guiprocessmanager", "settings"],
             }
 
             var settings = {
-                "url": "http://localhost:8000/api/get-dali-color",
+                "url": "http://103.226.249.160:18004/api/get-dali-color",
                 "method": "POST",
                 "timeout": 0,
                 "headers": {

@@ -115,8 +115,33 @@ export class ColorReducer {
         }
 
         const random = new Random(settings.randomSeed === 0 ? new Date().getTime() : settings.randomSeed);
+
+        // setting anchor to color space
+        let colorAnchors: Vector[] = []
+        for (let i = 0; i < settings.kMeansColorAnchors.length; i++) {
+            const rgb: number[] = settings.kMeansColorAnchors[i];
+            
+            rgb[0] = rgb[0] >> bitsToChopOff << bitsToChopOff;
+            rgb[1] = rgb[1] >> bitsToChopOff << bitsToChopOff;
+            rgb[2] = rgb[2] >> bitsToChopOff << bitsToChopOff;
+            // determine vector data based on color space conversion
+            let data: number[];
+            if (settings.kMeansClusteringColorSpace === ClusteringColorSpace.RGB) {
+              data = rgb;
+            } else if (settings.kMeansClusteringColorSpace === ClusteringColorSpace.HSL) {
+              data = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+            } else if (settings.kMeansClusteringColorSpace === ClusteringColorSpace.LAB) {
+              data = rgb2lab(rgb);
+            } else {
+              data = rgb;
+            }
+            const weight = 1;
+            const vec = new Vector(data, weight);
+            colorAnchors[i] = vec;
+          }
+
         // vectors of all the unique colors are built, time to cluster them
-        const kmeans = new KMeans(vectors, settings.kMeansNrOfClusters, random);
+        const kmeans = new KMeans(vectors, settings.kMeansNrOfClusters, random, null, colorAnchors);
 
         let curTime = new Date().getTime();
 
@@ -136,6 +161,8 @@ export class ColorReducer {
             }
 
         }
+
+        console.log(kmeans.centroids);
 
         // update the output image data (because it will be used for further processing)
         ColorReducer.updateKmeansOutputImageData(kmeans, settings, pointsByColor, imgData, outputImgData, true);
