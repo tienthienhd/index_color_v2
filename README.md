@@ -112,5 +112,12 @@ To run do `npm install` to restore packages and then `npm start` to start the we
 
 
 ## Compiling the cli version
+at folder src-cli run command to build js from ts
+```tsc -w``` 
+
+note:
+  install nodejs 18.5.0: `sudo n 18.5.0`
+  install node canvas: with : wget http://ftp.de.debian.org/debian/pool/main/libj/libjpeg-turbo/libjpeg62-turbo_2.0.6-4_amd64.deb
+  sudo dpkg -i libjpeg62-turbo_2.0.6-4_amd64.deb
 
 Install pkg first if you don't have it yet `npm install pkg -g`. Then in the root folder run `pkg .`. This will generate the output for linux, windows and macos.

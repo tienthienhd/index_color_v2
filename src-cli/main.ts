@@ -314,7 +314,7 @@ async function createSVG(facetResult: FacetResult, colorsByIndex: RGB[], sizeMul
                 const nrOfDigits = (f.color + "").length;
                 const svgLabelString = `<g class="label" transform="translate(${labelOffsetX},${labelOffsetY})">
                                         <svg width="${labelWidth}" height="${labelHeight}" overflow="visible" viewBox="-50 -50 100 100" preserveAspectRatio="xMidYMid meet">
-                                            <text font-family="Tahoma" font-size="${(fontSize / nrOfDigits)}" dominant-baseline="middle" text-anchor="middle" fill="${fontColor}">${f.color}</text>
+                                            <text font-family="Tahoma" font-size="${(fontSize / nrOfDigits)}" dominant-baseline="middle" text-anchor="middle" fill="${fontColor}">${f.color + 1}</text>
                                         </svg>
                                        </g>`;
 
